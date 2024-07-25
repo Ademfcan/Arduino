@@ -1,6 +1,7 @@
 // Pin configuration (1-indexed for convenience)
 int pins[] = {-10, 11, 10, 9, 8, 7, 2, 3, 4, 5, 6};
 int pinCnt = 10;
+int inputPin = A0;
 
 // Digit pin mappings
 struct DigitPins {
@@ -24,7 +25,7 @@ DigitPins digits[] = {
 };
 
 // Delays
-int counterDelay = 1000;
+int counterDelay = 300 ;
 int switchDelay = 5;
 
 void setup() {
@@ -32,17 +33,20 @@ void setup() {
     for (int i = 1; i <= pinCnt; i++) {
         pinMode(pins[i], OUTPUT);
     }
+    // setup input pin
+    pinMode(inputPin,INPUT);
 }
 
 void loop() {
-    for (int i = 0; i < 99; i++) {
-        // calculate what digit to show on either side
-        int right = i % 10;
-        int left = i / 10;
-        bool isLeft = true;
-        // set each left/right sides on/off very quickly to make it appear as both sides are on at the same time
-        // this is the only way due to the display having shared pins
-        for (int j = 0; j < counterDelay; j += switchDelay) {
+    float val = analogRead(inputPin);
+    // scale value between 0 - 99
+    int valMapped = map(val,0,1023,0,99);
+    int right = valMapped % 10;
+    int left = valMapped / 10;
+    // set each left/right sides on/off very quickly to make it appear as both sides are on at the same time
+    // this is the only way due to the display having shared pins
+    bool isLeft = true;
+    for (int j = 0; j < counterDelay; j += switchDelay) {
             if (isLeft) {
                 setDigit(true, left, false);
             } else {
@@ -50,7 +54,6 @@ void loop() {
             }
             isLeft = !isLeft;
             delay(switchDelay);
-        }
     }
 }
 
